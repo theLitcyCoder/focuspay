@@ -132,7 +132,7 @@ import toast from 'react-hot-toast';
 
 export default function CreateCampaign() {
   const router = useRouter();
-  const { authorized, checking } = useRequireRole('advertiser');
+  const { authorized} = useRequireRole('advertiser');
 
   const initialForm = {
     title: '',
@@ -151,7 +151,7 @@ export default function CreateCampaign() {
   const [cpa, setCpa] = useState(initialForm.cpa);
   const [reward, setReward] = useState(initialForm.reward);
   const [status, setStatus] = useState(initialForm.status);
-  const [error, setError] = useState('');
+  const [error] = useState('');
 
   const handleCreate = async () => {
     if (!title || !url || !budget || !reward || !status) {

@@ -8,9 +8,8 @@ import toast from 'react-hot-toast';
 
 export default function EditCampaign() {
   const router = useRouter();
-  // const { campaign_id } = router.query;
   const [campaign, setCampaign] = useState<any>(null);
-   const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
   const { campaign_id: campaignId } = router.query;
   const { authorized, checking } = useRequireRole('advertiser');
   const [formData, setFormData] = useState({
@@ -36,7 +35,7 @@ console.log('Rendering EditCampaignPage with ID:', campaignId);
 
       if (!session?.user) return;
 
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('campaigns')
         .select('*')
         .eq('campaign_id', campaignId)

@@ -10,9 +10,9 @@ import toast from 'react-hot-toast';
 export default function AdvertiserDashboard() {
   const router = useRouter();
   const { authorized, checking } = useRequireRole('advertiser');
-  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [campaigns, setCampaigns] = useState< any[] >([]);
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState< any >(null);
 
   useEffect(() => {
     const fetchData = async () => {
