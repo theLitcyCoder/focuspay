@@ -1,0 +1,21 @@
+@import "tailwindcss";
+@tailwindcss base;
+@tailwindcss components;
+@tailwindcss utilities;
+
+
+/* Optional: smooth transition */
+html {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+@custom-variant dark (&:where(.dark, .dark *));
+:root {
+    --background: #ffffff;
+    --foreground: #171717;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: #0a0a0a;
+      --foreground: #ededed;
+    }
+  }  
