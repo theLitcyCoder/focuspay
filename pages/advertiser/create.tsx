@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 
 export default function CreateCampaign() {
   const router = useRouter();
-  const { authorized} = useRequireRole('advertiser');
+  const { authorized, user } = useRequireRole('advertiser');
 
   const initialForm = {
     title: '',
@@ -35,26 +35,50 @@ export default function CreateCampaign() {
       return;
     }
 
-    const { error } = await supabase.from('campaigns').insert([
-      {
-        user_id: authorized,
-        title,
-        type,
-        url,
-        budget: parseFloat(budget),
-        cost_per_action: parseFloat(cpa),
-        reward: parseFloat(reward),
-        status,
-      },
-    ]);
+   const { data: campaignData, error: campaignError } = await supabase
+  .from('campaigns')
+  .insert([
+    {
+      user_id: user?.id,
+      title,
+      type,
+      url,
+      budget: parseFloat(budget),
+      cost_per_action: parseFloat(cpa),
+      reward: parseFloat(reward),
+      status,
+    },
+  ])
+  .select()
+  .single();
 
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success('Campaign created!');
-      setTimeout(() => router.push('/advertiser'), 1000);
-    }
+  // Insert the link after the campaign is created
+const { error: linkError } = await supabase.from('links').insert([
+  {
+    campaign_id: campaignData.campaign_id,
+    url,
+    pay_per_click: campaignData.reward,
+    status: campaignData.status
+  },
+]);
+
+if (linkError) {
+  toast.error(linkError.message);
+  return;
+}
+
+toast.success('Campaign and link created!');
+setTimeout(() => router.push('/advertiser'), 1000);
   };
+  //  if (campaignError) {
+  // toast.error(campaignError.message);
+  //   } else {
+  //     toast.success('Campaign created!');
+  //     setTimeout(() => router.push('/advertiser'), 1000);
+  //   }
+
+    
+
 
   const handleBack = () => {
     const currentForm = { title, url, type, budget, cpa, reward, status };

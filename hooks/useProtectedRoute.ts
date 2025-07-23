@@ -37,6 +37,7 @@ export function useRequireRole(requiredRole: string) {
   const router = useRouter();
   const [authorized, setAuthorized] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [user, setUser] = useState<any>(null); // ← NEW
 
   useEffect(() => {
     const verify = async () => {
@@ -60,6 +61,7 @@ export function useRequireRole(requiredRole: string) {
         return;
       }
 
+      setUser(session.user); // ← NEW
       setAuthorized(true);
       setChecking(false);
     };
@@ -67,5 +69,5 @@ export function useRequireRole(requiredRole: string) {
     verify();
   }, [router, requiredRole]);
 
-  return { authorized, checking };
+  return { authorized, checking, user };
 }

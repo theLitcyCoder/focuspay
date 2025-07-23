@@ -22,12 +22,12 @@ export function useVisitTask() {
     const taskWindow = window.open(safeUrl, '_blank');
 
     if (!taskWindow) {
-      alert('⚠️ Failed to open new tab. Please allow popups for this site.');
+      toast.error('⚠️ Failed to open new tab. Please allow popups for this site.');
       setOverlay(false);
       return;
     }
 
-    taskWindow.focus();
+    // taskWindow.focus();
 
     let seconds = 10;
 
@@ -42,6 +42,7 @@ export function useVisitTask() {
         document.title = '✅ Task Completed - FocusPay';
         markTaskAsViewed(task.campaign_id);
         try {
+          taskWindow.focus();
           taskWindow.close();
         } catch (err) {
           console.warn('Could not close tab:', err);
@@ -80,6 +81,19 @@ const markTaskAsViewed = async (campaignId: string) => {
     return;
   }
 
+  // Prevent double views
+  const { data: alreadyViewed } = await supabase
+    .from('task_views')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('campaign_id', campaignId)
+    .maybeSingle();
+
+  if (alreadyViewed) {
+    toast.error('Task already viewed.');
+    return;
+  }
+
   const { error } = await supabase.from('tasks_views').insert([
     {
       user_id: user.id,
@@ -90,7 +104,7 @@ const markTaskAsViewed = async (campaignId: string) => {
   if (error) {
     console.error('Error recording task view:', error.message);
   } else {
-    console.log(`✅ Task ${campaignId} marked as viewed for user ${user.id}`);
+    toast.success(`✅ Task ${campaignId} marked as viewed for user ${user.id}`);
   }
 
     // ✅ 2. Get the campaign reward
@@ -110,13 +124,13 @@ const markTaskAsViewed = async (campaignId: string) => {
   // ✅ 3. Update user earnings
   const { error: earningsError } = await supabase.rpc('increment_earnings', {
     user_id_input: user.id,
-    amount_input: reward,
+    amount_input: campaign.reward,
   });
 
   if (earningsError) {
     console.error('Error updating earnings:', earningsError.message);
   } else {
-    console.log(`💰 ${reward} added to user ${user.id}`);
+    toast.success(`💰 ${campaign.reward} added to user ${user.id}`);
   }
 };
 

@@ -14,9 +14,9 @@ export default function Earnings() {
 
   const fetchEarnings = async () => {
     const { data, error } = await supabase
-      .from('task_completions')
-      .select('reward')
-      .eq('user_id', user.id);
+      .from('tasks_views')
+      .select('*')
+      .eq('id', user.id);
 
     if (!error) {
       const total = data.reduce((sum, task) => sum + task.reward, 0);
