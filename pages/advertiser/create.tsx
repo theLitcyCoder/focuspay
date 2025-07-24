@@ -55,8 +55,9 @@ export default function CreateCampaign() {
   // Insert the link after the campaign is created
 const { error: linkError } = await supabase.from('links').insert([
   {
-    campaign_id: campaignData.campaign_id,
+    user_id: user?.id,
     url,
+    campaign_id: campaignData.campaign_id,
     pay_per_click: campaignData.reward,
     status: campaignData.status
   },

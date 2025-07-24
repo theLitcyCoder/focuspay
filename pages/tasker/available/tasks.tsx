@@ -312,7 +312,7 @@ type Task = {
   title: string;
   url: string;
   status: string;
-  reward: number;
+  pay_per_click: number;
 };
 
 type Profile = {
@@ -337,6 +337,7 @@ export default function AvailableTasks() {
 
   const fetchAvailableTasks = async () => {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
+
     if (userError || !user) {
         console.error('No user found or error getting user:', userError?.message);
         return;
@@ -344,50 +345,58 @@ export default function AvailableTasks() {
 
     // 1. Get viewed campaign_ids by user
     const { data: views, error: viewsError } = await supabase
-    .from('task_views')
+    .from('tasks_views')
     .select('campaign_id')
     .eq('user_id', user.id);
 
-    const viewedIds = views?.map(v => v.campaign_id) ?? [];
-
- const { data: tasksData, error } = await supabase
-    .from('links')
-    .select(`
-      *,
-      campaigns!inner(
-        id,
-        title,
-        reward,
-        status
-      )
-    `)
-    .neq('campaigns.status', 'Active')
-    .not('campaign_id', 'in', viewedIds.length > 0 ? viewedIds : ['dummy']); // Avoid empty 'in' error
-
-  if (error) {
-    console.error('Error fetching tasks:', error.message);
-  } else {
-    // Map to your Task type structure
-    const mappedTasks = tasksData.map(link => ({
-      campaign_id: link.campaign_id,
-      title: link.campaigns.title,
-      url: link.url,
-      status: link.campaigns.status,
-      reward: link.campaigns.reward,
-    }));
-
-    setTasks(mappedTasks);
-    // const { data, error } = await supabase
-    //   .from('campaigns')
-    //   .select('*')
-    //   .eq('status', 'Active');
-
-    // if (error) {
-    //   console.error('Error fetching campaigns:', error.message);
-    // } else {
-    //   setTasks(data);
+    if (viewsError) {
+      console.error('Error fetching task views:', viewsError.message);
+      return;
     }
-  };
+
+    const viewedCampaignIds = views?.map(v => v.campaign_id) ?? [];
+
+
+let query = supabase
+
+    .from('links')
+    .select('*')
+    .eq('status', 'Active');
+
+  if (viewedCampaignIds.length > 0) {
+    query = query.not('campaign_id', 'in', viewedCampaignIds);
+    console.log('Vyes', viewedCampaignIds);
+
+  }else{
+        console.log('no', viewedCampaignIds);
+
+  }
+
+  const { data: links, error: linksError } = await query;
+
+  if (linksError) {
+    console.error('Error fetching links:', linksError.message);
+    return;
+  }
+console.log('Links returned:', links);
+console.log('Viewed campaigns:', viewedCampaignIds);
+  setTasks(links);
+
+
+// const { data: links, error: linksError } = await supabase      .from('links')
+//       .select('*')
+//       .eq('status', 'Active')
+//       .not('campaign_id', 'in', ['00000000-0000-0000-0000-000000000000']);
+// console.log('Viewed campaigns:', viewedCampaignIds);
+
+//   if (linksError) {
+//     console.error('Error fetching links:', linksError.message);
+//     return;
+//   }
+  
+//   setTasks(links);
+    };
+ 
 
   const fetchProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -443,7 +452,7 @@ export default function AvailableTasks() {
               className="p-4 border rounded bg-white dark:bg-gray-800"
             >
               <h2 className="text-lg font-semibold">{task.title}</h2>
-              <p>Reward: ${task.reward}</p>
+              <p>Reward: ${task.pay_per_click}</p>
               <button
                 onClick={() => visitTask(task)}
                 className="text-blue-600 underline mt-2"

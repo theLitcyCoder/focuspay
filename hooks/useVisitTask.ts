@@ -130,7 +130,7 @@ const markTaskAsViewed = async (campaignId: string) => {
   if (earningsError) {
     console.error('Error updating earnings:', earningsError.message);
   } else {
-    toast.success(`💰 ${campaign.reward} added to user ${user.id}`);
+    toast.success(`💰 ${campaign.reward}`);
   }
 };
 
